@@ -32,63 +32,41 @@
 </template>
 
 <script>
-import axios from 'axios';
 import TopicBlock from './TopicBlock.vue';
-import { useFeedStore } from '@/stores/feedStore';
-
+import { useFeedStore } from '@/stores/FeedStore';
 
 export default {
     name: 'FeedList',
-    setup(){
+    setup() {
         const feedStore = useFeedStore();
 
-        //컴포넌트가 마운트될때 내 피드를 가져온다.
-        feedStore.fetchFeeds();
+        // 피드를 가져오는 메서드를 setup에서 호출하지 않고 mounted에서 호출하도록 변경
+        const fnView = (id) => {
+            this.$router.push({ name: 'FeedDetail', params: { id } });
+        };
 
-        return{
-            feeds : feedStore.feeds,
-            fnView(id){
-                this.$router.push({name : 'FeedDetail', params:{id}});
-            },
-            fnCreateNewFeed(){
-                this.$router.push({name : 'FeedForm'});
-            },
+        const fnCreateNewFeed = () => {
+            this.$router.push({ name: 'FeedForm' });
+        };
+
+        return {
+            feeds: feedStore.feeds,
+            fnView,
+            fnCreateNewFeed,
+            fetchFeeds: feedStore.fetchFeeds, // fetchFeeds를 feedStore의 메서드로 바인딩
         };
     },
     components: {
         TopicBlock,
     },
-    data() {
-        return {
-            feeds: [], // 초기에는 빈 배열로 시작
-        };
-    },
     methods: {
-        fnView(id) {
-            // 특정 피드 보기 액션 처리
-            this.$router.push({ name: 'FeedDetail', params: { id: id } });
-        },
-        fnCreateNewFeed() {
-            // 새로운 피드 생성 액션 처리
-            this.$router.push({ name: 'FeedForm' });
-        },
-        fetchFeeds() {
-            // API 호출로 피드 데이터 가져오기
-            axios.get('http://localhost:8085/api/feeds') // 백엔드 API 엔드포인트를 사용하여 데이터 가져오기
-                .then(response => {
-                    this.feeds = response.data; // 백엔드에서 받아온 데이터를 feeds에 저장
-                })
-                .catch(error => {
-                    console.error("Error fetching feeds:", error);
-                });
-        },
         formatDate(dateString) {
             const options = { year: 'numeric', month: 'long', day: 'numeric' };
             return new Date(dateString).toLocaleDateString(undefined, options);
-        }
+        },
     },
     mounted() {
-        this.fetchFeeds(); // 컴포넌트가 마운트되면 피드 데이터를 가져옵니다
+        this.fetchFeeds(); // feedStore의 fetchFeeds를 호출
     }
 };
 </script>

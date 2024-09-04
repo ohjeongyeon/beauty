@@ -10,6 +10,7 @@ export const useFeedStore = defineStore('feedStore', {
             try {
                 const response = await axios.get('http://localhost:8085/feeds');
                 this.feeds = response.data;
+                console.log(response.data);
             } catch (error) {
                 console.error("Error fetching feeds:", error);
             }
